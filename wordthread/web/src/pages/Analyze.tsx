@@ -1,14 +1,37 @@
+import { useState } from 'react';
+import { useMutation } from '@tanstack/react-query';
 import TabBar from '../components/layout/TabBar';
+import { startAnalysis } from '../lib/api';
 
 const Analyze = () => {
+  const [text, setText] = useState('');
+  const [runId, setRunId] = useState<string | null>(null);
+
+  const mutation = useMutation({
+    mutationFn: startAnalysis,
+    onSuccess: (data) => {
+      setRunId(data.run_id);
+    },
+  });
+
   return (
     <div className="flex flex-col w-full h-screen bg-background text-text">
       <div className="flex flex-grow">
         {/* Left Sidebar */}
         <div className="w-1/4 p-4 border-r border-gray-700">
           <h2 className="mb-4 text-lg font-bold">Text Input / Upload</h2>
-          <textarea className="w-full h-64 p-2 rounded bg-panel text-text"></textarea>
-          <button className="w-full py-2 mt-4 font-bold rounded bg-accent text-background">Run</button>
+          <textarea
+            className="w-full h-64 p-2 rounded bg-panel text-text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          ></textarea>
+          <button
+            className="w-full py-2 mt-4 font-bold rounded bg-accent text-background"
+            onClick={() => mutation.mutate({ text })}
+          >
+            {mutation.isPending ? 'Running...' : 'Run'}
+          </button>
+          {runId && <p className="mt-2 text-sm">Run ID: {runId}</p>}
         </div>
 
         {/* Main Content */}
